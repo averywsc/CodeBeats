@@ -1,0 +1,808 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>CodeBeats: learn JavaScript by making music</title>
+<style>
+:root{--bg:#aeb2b5;--pn:#d3d6d8;--pn2:#bfc3c6;--ink:#23201c;--mute:#5b564e;--line:#8e9296;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);color-scheme:light}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#171513;--pn:#3b3a37;--pn2:#2d2c2a;--ink:#ece6d8;--mute:#aaa392;--line:#14120f;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#171513;--pn:#3b3a37;--pn2:#2d2c2a;--ink:#ece6d8;--mute:#aaa392;--line:#14120f;color-scheme:dark}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font:15px/1.5 system-ui,-apple-system,"Segoe UI",sans-serif;min-height:100vh}
+.top{display:flex;flex-wrap:wrap;gap:14px 22px;align-items:center;padding:12px 18px;color:#f4dfb8;border-bottom:4px solid #2a170a;background:repeating-linear-gradient(92deg,rgba(0,0,0,.07) 0 2px,transparent 2px 7px),linear-gradient(#8c5a30,#64391a)}
+.logo{font:800 22px/1 "Trebuchet MS",system-ui,sans-serif;letter-spacing:.5px;text-shadow:0 2px 0 #3a2010}
+.logo small{display:block;font:500 12px/1.3 system-ui,sans-serif;opacity:.85;letter-spacing:0;text-shadow:none;margin-top:3px}
+.tx{display:flex;gap:8px}
+button{font:inherit;cursor:pointer;color:#26231f;border:1px solid #6d7073;border-radius:7px;padding:7px 14px;background:linear-gradient(#f1f2f3,#b9bdc0);box-shadow:0 2px 0 #6d7073,inset 0 1px 0 #fff}
+button:active{transform:translateY(2px);box-shadow:0 0 0 #6d7073}
+button:focus-visible,textarea:focus-visible{outline:3px solid #ffb13d;outline-offset:2px}
+#play{font-weight:700;min-width:96px}
+#play.on{background:linear-gradient(#bff0b4,#6cc25c)}
+.led{font:700 20px/1 ui-monospace,Menlo,Consolas,monospace;color:#ffa626;background:#1b1006;border:2px solid #0b0602;border-radius:6px;padding:8px 12px;text-shadow:0 0 8px #ff8a00;box-shadow:inset 0 2px 6px #000;min-width:92px}
+.led i{display:block;font:500 10px/1 system-ui,sans-serif;color:#b97a2a;text-shadow:none;margin-bottom:4px;font-style:normal}
+.vu{width:120px;height:14px;background:#1b1006;border:2px solid #0b0602;border-radius:4px;overflow:hidden;box-shadow:inset 0 2px 4px #000}
+.vu b{display:block;height:100%;width:0;background:linear-gradient(90deg,#4fd05a 0 60%,#ffc233 60% 85%,#ff4d36 85%)}
+main{display:grid;grid-template-columns:minmax(250px,320px) 1fr;gap:16px;padding:16px;max-width:1240px;margin:0 auto}
+@media(max-width:780px){main{grid-template-columns:1fr;padding:10px}}
+.pn{background:linear-gradient(var(--pn),var(--pn2));border:2px solid var(--line);border-radius:10px;padding:12px;box-shadow:0 3px 0 rgba(0,0,0,.25),inset 0 1px 0 rgba(255,255,255,.35)}
+.pn h2{margin:0 0 8px;font:700 13px/1 "Trebuchet MS",system-ui,sans-serif;color:var(--mute)}
+#list{display:grid;gap:5px;margin-bottom:12px}
+#list button{display:flex;gap:9px;align-items:center;text-align:left;padding:6px 10px}
+#list button[aria-current=true]{background:linear-gradient(#ffd98a,#f0a62e);border-color:#8a5a14}
+#list span{flex:none;width:22px;height:22px;border-radius:50%;background:#1b1006;color:#ffa626;font:700 12px/22px ui-monospace,monospace;text-align:center}
+#list .ok span{background:#2c8a3c;color:#eaffea}
+#lt{margin:0 0 6px;font:800 19px/1.2 "Trebuchet MS",system-ui,sans-serif}
+#lbody p{margin:0 0 9px}
+code{font:13px ui-monospace,Menlo,Consolas,monospace;background:rgba(0,0,0,.14);padding:1px 5px;border-radius:4px}
+.goal{border-left:5px solid #f0a62e;background:rgba(240,166,46,.18);padding:8px 10px;border-radius:0 7px 7px 0;margin:10px 0}
+.nav{display:flex;gap:8px;flex-wrap:wrap}
+.col{display:grid;gap:16px;align-content:start;min-width:0}
+.bar{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:8px}
+.bar h2{margin:0}
+textarea{display:block;width:100%;min-height:270px;resize:vertical;background:#150e07;color:#ffc46b;border:2px solid #0b0602;border-radius:7px;padding:12px;font:14px/1.55 ui-monospace,Menlo,Consolas,monospace;tab-size:2;box-shadow:inset 0 3px 8px #000}
+#log{margin-top:8px;min-height:38px;padding:8px 10px;border-radius:6px;background:#1b1006;color:#ffa626;font:13px/1.4 ui-monospace,Menlo,Consolas,monospace;border:2px solid #0b0602}
+#log.err{color:#ff7a66}
+canvas{display:block;width:100%;height:210px;border-radius:7px;border:2px solid #0b0602}
+details{font-size:14px}
+summary{cursor:pointer;font-weight:700}
+dl{display:grid;grid-template-columns:max-content 1fr;gap:4px 14px;margin:8px 0 0}
+dt{font:13px ui-monospace,Menlo,Consolas,monospace}dd{margin:0}
+#intro{position:fixed;inset:0;z-index:20;display:grid;place-items:center;overflow:auto;padding:calc(16px + env(safe-area-inset-top,0px)) 16px calc(16px + env(safe-area-inset-bottom,0px));background:rgba(20,12,5,.86)}
+#intro[hidden]{display:none}
+.card{max-width:560px;width:100%}
+.card h1{margin:0 0 10px;font:800 27px/1.15 "Trebuchet MS",system-ui,sans-serif}
+.card ol{margin:0 0 12px;padding-left:22px}
+#demo{margin:0 0 14px;padding:10px 12px;border-radius:7px;background:#150e07;color:#ffc46b;font:13px/1.5 ui-monospace,Menlo,Consolas,monospace;overflow-x:auto;border:2px solid #0b0602}
+.ch{margin:10px 0 2px;font:700 12px/1.2 "Trebuchet MS",system-ui,sans-serif;color:var(--mute)}
+#kbw{overflow-x:auto}
+#kb{position:relative;height:118px;min-width:620px;background:#0b0602;border:2px solid #0b0602;border-radius:7px}
+#kb div{position:absolute;top:0;cursor:pointer}
+.wk{height:100%;background:linear-gradient(#f7f3e8,#ddd6c3);border:1px solid #8a8272;border-radius:0 0 4px 4px;font:10px/1 ui-monospace,monospace;color:#5b564e;display:flex;align-items:flex-end;justify-content:center;padding-bottom:5px}
+.bk{height:62%;background:linear-gradient(#3a3733,#0e0c0a);border-radius:0 0 3px 3px;z-index:2}
+#kb .on{background:linear-gradient(#ffc766,#f0a62e)}
+main{gap:24px;padding:24px}
+main.one{grid-template-columns:1fr;max-width:920px}
+.pn{padding:18px 20px;border-radius:14px}
+section[aria-label=Lessons]{position:sticky;top:12px;align-self:start;max-height:calc(100vh - 24px);overflow:auto}
+@media(max-width:780px){section[aria-label=Lessons]{position:static;max-height:none}main{padding:12px;gap:14px}}
+.tabs{display:flex;gap:6px;flex-wrap:wrap;flex-basis:100%;order:9}
+.tabs button{background:rgba(0,0,0,.25);color:#f4dfb8;border:1px solid rgba(0,0,0,.35);box-shadow:none;padding:7px 18px;font-weight:600}
+.tabs button[aria-current=page]{background:linear-gradient(#ffd98a,#f0a62e);color:#2a170a}
+.logo{font-size:26px}
+textarea{min-height:340px;font-size:15px}
+canvas{height:240px}
+#hm h1{margin:0 0 6px;font:800 30px/1.15 "Trebuchet MS",system-ui,sans-serif}
+#hm>p{margin:0 0 18px;color:var(--mute)}
+.cg{display:grid;gap:16px;grid-template-columns:repeat(auto-fit,minmax(250px,1fr))}
+.cc{display:flex;flex-direction:column;gap:8px;padding:16px 18px;border:2px solid var(--line);border-top:8px solid var(--c);border-radius:14px;background:linear-gradient(var(--pn),var(--pn2));box-shadow:0 3px 0 rgba(0,0,0,.25)}
+.cc h3{margin:0;font:800 19px/1.2 "Trebuchet MS",system-ui,sans-serif}
+.cc p{margin:0;flex:1}
+.cc span{font-size:13px;color:var(--mute)}
+.pb{height:10px;background:#1b1006;border-radius:6px;overflow:hidden}
+.pb i{display:block;height:100%;background:var(--c)}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="logo">CodeBeats<small>Write JavaScript. Hear a song.</small></div>
+  <div class="tx">
+    <button id="play" aria-label="Run code and play">▶ Play</button>
+    <button id="stop" aria-label="Stop">■ Stop</button>
+  </div>
+  <div class="led"><i>TEMPO</i><span id="dB">120</span> BPM</div>
+  <div class="led"><i>LOOP</i><span id="dL">4</span> beats</div>
+  <div class="vu" title="Output level"><b id="vu"></b></div>
+  <nav class="tabs" aria-label="Pages"><button data-go="home">Courses</button><button data-go="learn">Learn</button><button data-go="practice">Ear training</button><button data-go="ref">Reference</button></nav>
+  <button id="introBtn">Intro</button>
+</header>
+<main>
+  <section class="pn" aria-label="Lessons">
+    <h2 id="lh">Lessons</h2>
+    <div id="list"></div>
+    <h3 id="lt"></h3>
+    <div id="lbody"></div>
+    <div class="goal"><strong>Your mission:</strong> <span id="goal"></span></div>
+    <div class="nav"><button id="prev">‹ Back</button><button id="next">Next ›</button><button id="hint">Hint</button><button id="reset">Reset code</button></div>
+  </section>
+  <div class="col">
+    <section id="hm" data-v="home"></section>
+    <section class="pn" data-v="learn" aria-label="Code editor">
+      <div class="bar"><h2>Code editor</h2><span style="font-size:12px;color:var(--mute)">Ctrl or ⌘ + Enter to play</span></div>
+      <textarea id="code" spellcheck="false" autocapitalize="off" autocomplete="off" aria-label="JavaScript code"></textarea>
+      <div id="log">Press Play to run your code.</div>
+    </section>
+    <section class="pn" data-v="learn" aria-label="Tracks">
+      <h2>Tracks</h2>
+      <canvas id="cv"></canvas>
+      <h2 style="margin:14px 0 6px">Keyboard: click a key to hear it</h2>
+      <div id="kbw"><div id="kb"></div></div>
+      <div id="kn" class="led" style="margin-top:8px;font-size:14px">Click a key</div>
+    </section>
+    <section class="pn" data-v="practice" aria-label="Ear trainer">
+      <h2>Ear trainer</h2>
+      <p style="margin:0 0 10px">An <strong>interval</strong> is the distance between two notes, counted in semitones. Press Play, listen to the two notes, then name the interval.</p>
+      <div class="nav"><button id="ep">▶ Play interval</button></div>
+      <div id="eb" class="nav" style="margin-top:8px"></div>
+      <div id="ef" class="led" style="margin-top:8px;font-size:13px;line-height:1.4">Press Play interval to start.</div>
+      <h2 style="margin:22px 0 8px">Major or minor?</h2>
+      <p style="margin:0 0 10px">A major chord sounds bright and a minor chord sounds darker. Listen to the chord and decide which it is.</p>
+      <div class="nav"><button id="cp">▶ Play chord</button><button id="cm1">Major</button><button id="cm2">Minor</button></div>
+      <div id="cf" class="led" style="margin-top:8px;font-size:13px;line-height:1.4">Press Play chord to start.</div>
+    </section>
+    <section class="pn">
+      <details><summary>Toolbox: every command you can use</summary>
+      <dl>
+        <dt>bpm(n)</dt><dd>Set the tempo, 50 to 200.</dd>
+        <dt>loop(beats)</dt><dd>How many beats before the song repeats.</dd>
+        <dt>kick(beat)</dt><dd>Bass drum on a beat. Beat 0 is the start; 0.5 is halfway to beat 1.</dd>
+        <dt>snare(beat)</dt><dd>Snare drum.</dd>
+        <dt>hat(beat)</dt><dd>Hi-hat.</dd>
+        <dt>note(name, beat, length)</dt><dd>Play a note such as "C4" or "F#3". Length is in beats.</dd>
+        <dt>chord([names], beat, length)</dt><dd>Play several notes at once.</dd>
+        <dt>transpose(note, n)</dt><dd>Move a note up (or down, with a negative number) by n semitones.</dd>
+        <dt>makeScale(root, type)</dt><dd>List the 8 notes of a “major” or “minor” scale.</dd>
+        <dt>sound(wave)</dt><dd>"sine", "triangle", "square" or "sawtooth". Applies to notes after it.</dd>
+      </dl></details>
+      <details style="margin-top:10px"><summary>JavaScript glossary</summary><dl>
+        <dt>variable</dt><dd>A named box that holds a value. <code>let</code> can change later; <code>const</code> stays fixed.</dd>
+        <dt>string</dt><dd>Text inside quotes, like “C4”.</dd>
+        <dt>number</dt><dd>A value you can calculate with, like 120 or 0.5.</dd>
+        <dt>operator</dt><dd>A symbol that calculates or compares: <code>+ - * / % ===</code></dd>
+        <dt>array</dt><dd>A list in square brackets. Position 0 is the first item.</dd>
+        <dt>object</dt><dd>Named values grouped together, read with a dot: <code>song.tempo</code></dd>
+        <dt>function</dt><dd>A named recipe you write once and call whenever you like.</dd>
+        <dt>loop</dt><dd>Repeats code. <code>for</code> counts; <code>forEach</code> visits each array item.</dd>
+        <dt>if / else</dt><dd>Runs code only when a condition is true.</dd>
+        <dt>bug</dt><dd>A mistake in code. Error messages tell you where to look.</dd>
+      </dl></details>
+      <details style="margin-top:10px"><summary>Music theory cheat sheet</summary><dl>
+        <dt>Major scale</dt><dd>0 2 4 5 7 9 11 12 (semitones from the root)</dd>
+        <dt>Minor scale</dt><dd>0 2 3 5 7 8 10 12</dd>
+        <dt>Major chord</dt><dd>0 4 7: bright and happy</dd>
+        <dt>Minor chord</dt><dd>0 3 7: darker and sadder</dd>
+        <dt>Intervals</dt><dd>3 minor third, 4 major third, 5 perfect fourth, 7 perfect fifth, 12 octave</dd>
+        <dt>Note lengths</dt><dd>1 = quarter note, 0.5 = eighth, 0.25 = sixteenth (in beats)</dd>
+        <dt>Octaves</dt><dd>C4 is middle C. Each octave up doubles the frequency.</dd>
+      </dl></details>
+    </section>
+  </div>
+</main>
+<div id="intro" role="dialog" aria-modal="true" aria-labelledby="it">
+  <div class="pn card">
+    <h1 id="it">Learn JavaScript by making music</h1>
+    <p>No experience needed. Each of the <span id="nl"></span> short lessons across five courses (JavaScript basics, music theory, sound design, songwriting and generative music) teaches one idea, and you hear the result as soon as you press Play.</p>
+    <ol>
+      <li>Read the lesson on the left.</li>
+      <li>Change the code in the editor.</li>
+      <li>Press Play and finish the mission to earn the tick.</li>
+    </ol>
+    <p>This is what a few lines of code sound like:</p>
+    <pre id="demo"></pre>
+    <div class="nav"><button id="hear">▶ Hear it</button><button id="go" style="font-weight:700">Start learning</button></div>
+  </div>
+</div>
+<script>
+const $=s=>document.querySelector(s);
+const L=[
+{t:"Your first note",
+b:"<p>Code is a list of instructions the computer follows from top to bottom. <code>note(name, beat, length)</code> is one instruction: it plays a pitch.</p><p>Lines that start with <code>//</code> are comments, notes for humans that the computer skips.</p>",
+g:"add a fourth note, then press Play.",
+c:'// note(name, beat, length)\nnote("C4", 0, 1);\nnote("E4", 1, 1);\nnote("G4", 2, 2);\n',
+k:c=>c.note>=4},
+{t:"Variables",
+b:"<p>A <strong>variable</strong> is a labelled box that holds a value. <code>let speed = 100;</code> makes a box called <code>speed</code>. Use the box anywhere you would use the number.</p>",
+g:"set speed to 140 or higher so the tune goes faster. Then try sound(\"sine\").",
+c:'let speed = 100;\nbpm(speed);\nsound("square");\n\nnote("A3", 0, 1);\nnote("C4", 1, 1);\nnote("E4", 2, 1);\nnote("A4", 3, 1);\n',
+k:(c,s)=>s.bpm>=140&&c.note>=1},
+{t:"Loops",
+b:"<p>A <strong>for loop</strong> repeats a block of code. In <code>for (let i = 0; i &lt; 4; i++)</code> the counter <code>i</code> goes 0, 1, 2, 3, so <code>kick(i)</code> runs four times on four different beats.</p>",
+g:"add hi-hats between the kicks with hat(i + 0.5) inside the loop.",
+c:'loop(4);\n\nfor (let i = 0; i < 4; i++) {\n  kick(i);\n}\n',
+k:c=>c.kick>=4&&c.hat>=4},
+{t:"Arrays",
+b:"<p>An <strong>array</strong> is a list in square brackets. <code>forEach</code> visits every item, and <code>i</code> is its position, so each note lands one beat after the last.</p>",
+g:"keep the melody and add a kick drum on every beat with a for loop.",
+c:'loop(8);\n\nconst melody = ["C4", "D4", "E4", "G4", "E4", "D4", "C4", "G3"];\nmelody.forEach((n, i) => note(n, i, 1));\n',
+k:c=>c.note>=8&&c.kick>=4},
+{t:"Functions",
+b:"<p>A <strong>function</strong> is a named recipe you write once and use many times. <code>backbeat(start)</code> plays a drum pattern beginning at whatever beat you give it.</p>",
+g:"call backbeat(4) so the second half of the loop has drums too.",
+c:'loop(8);\n\nfunction backbeat(start) {\n  kick(start);\n  snare(start + 1);\n  kick(start + 2);\n  snare(start + 3);\n}\n\nbackbeat(0);\n',
+k:c=>c.snare>=4},
+{t:"If and else",
+b:"<p><code>if</code> lets code make decisions. <code>i % 2 === 0</code> asks whether <code>i</code> divides by 2 with nothing left over, which is true on every other beat.</p>",
+g:"add a bass note on every fourth beat: if (i % 4 === 0) { note(\"C2\", i, 2); }",
+c:'loop(8);\n\nfor (let i = 0; i < 8; i++) {\n  if (i % 2 === 0) {\n    kick(i);\n  } else {\n    snare(i);\n  }\n  hat(i + 0.5);\n}\n',
+k:c=>c.note>=2},
+{t:"Maths and rhythm",
+b:"<p>JavaScript can do arithmetic: <code>+</code> add, <code>-</code> subtract, <code>*</code> multiply, <code>/</code> divide. Beats are just numbers, so you can calculate them. <code>i * gap</code> turns 0, 1, 2, 3… into 0, 0.5, 1, 1.5…</p>",
+g:"add a snare on beats 1 and 3, written as sums such as snare(0 + 1).",
+c:`loop(4);
+
+const gap = 0.5;            // half a beat
+for (let i = 0; i < 8; i++) {
+  hat(i * gap);             // 0, 0.5, 1, 1.5 ...
+}
+
+kick(0);
+kick(2);
+`,
+k:c=>c.snare>=2&&c.hat>=8},
+{t:"Randomness",
+b:"<p><code>Math.random()</code> gives a random decimal between 0 and 1. Multiply it by a list’s <code>length</code> and wrap it in <code>Math.floor</code> to pick a random position. Every Play makes a new melody.</p>",
+g:"press Play a few times, then make the melody twice as busy: 16 notes on half beats, using i * 0.5 for the beat and 0.5 for the length.",
+c:`loop(8);
+
+// Pentatonic notes: they all sound good together
+const scale = ["C4", "D4", "E4", "G4", "A4"];
+
+for (let i = 0; i < 8; i++) {
+  const pick = Math.floor(Math.random() * scale.length);
+  note(scale[pick], i, 1);
+}
+
+kick(0);
+kick(4);
+`,
+k:c=>c.note>=16},
+{t:"Objects",
+b:"<p>An <strong>object</strong> groups related values under names. <code>song.tempo</code> reads the <em>tempo</em> value from the object called <code>song</code>. It keeps your settings in one tidy place.</p>",
+g:"add a property drums: 4 to the object, then use it: for (let i = 0; i < song.drums; i++) { kick(i * 2); }",
+c:`const song = {
+  tempo: 110,
+  wave: "square",
+  bass: "A2",
+  melody: ["A3", "C4", "E4", "C4"],
+};
+
+bpm(song.tempo);
+sound(song.wave);
+loop(8);
+
+song.melody.forEach((n, i) => note(n, i * 2, 2));
+note(song.bass, 0, 8);
+`,
+k:c=>c.kick>=4&&c.note>=5},
+{t:"Bug hunt",
+b:"<p>Every programmer writes bugs. The skill is reading the message and finding the cause. When something goes wrong, the log under the editor tells you what and why.</p>",
+g:"fix all 3 bugs. After each Play, read the log: every message points at the problem.",
+c:`// This song has 3 bugs.
+loop(2);
+
+note("H4", 0, 1);
+kcik(1);
+
+for (let i = 0; i < 8; i++) {
+  hat(i * 0.5);
+}
+`,
+k:c=>c.note>=1&&c.kick>=1&&c.hat>=8},
+{t:"Free play",
+b:"<p>Everything you have learned is in this song: variables, loops, arrays, functions and decisions. Break it, change it and make it yours.</p>",
+g:"change the chords, the tempo and the sound. Make something you like.",
+c:'bpm(96);\nloop(16);\nsound("sawtooth");\n\nconst chords = [\n  ["C3", "E3", "G3"],\n  ["A2", "C3", "E3"],\n  ["F2", "A2", "C3"],\n  ["G2", "B2", "D3"],\n];\nchords.forEach((c, i) => chord(c, i * 4, 4));\n\nfor (let i = 0; i < 16; i++) {\n  if (i % 4 === 0) kick(i);\n  if (i % 4 === 2) snare(i);\n  hat(i + 0.5);\n}\n',
+k:()=>true},
+{t:"Notes and octaves",
+b:"<p>Music has 7 note letters, A to G, and then the pattern starts again higher up. The number after the letter is the <strong>octave</strong>: <code>C4</code> is middle C, and <code>C5</code> is the same note one octave higher, with exactly double the frequency. Click the keyboard under the tracks to see each note’s name and frequency.</p><p>Black keys sit between the letters. <code>C#4</code> (“C sharp”) is one step above <code>C4</code>. The smallest step on a piano is a <strong>semitone</strong>, and <code>transpose('C4', 12)</code> moves a note up 12 of them: one whole octave.</p>",
+g:"add F4, G4, A4, B4 and C5 to the array so it climbs the whole scale. Then replace the last note with transpose('C4', 12) and check on the keyboard that it is still C5.",
+c:`loop(8);
+
+// The white keys, one after another
+const names = ["C4", "D4", "E4"];
+names.forEach((n, i) => note(n, i, 1));
+`,
+k:c=>c.note>=8},
+{t:"Scales",
+b:"<p>A <strong>scale</strong> is a set of notes that fit together. The <strong>major</strong> scale climbs by these semitone steps: <code>0 2 4 5 7 9 11 12</code>, and sounds bright. The <strong>minor</strong> scale is <code>0 2 3 5 7 8 10 12</code> and sounds darker. Start from any note and the same pattern works.</p><p>The shortcut <code>makeScale(root, type)</code> builds all 8 notes for you.</p>",
+g:"change C4 to D4 to move the whole scale up. Then swap in the minor steps and hear the mood change. Finally, play makeScale('A3', 'minor') with forEach.",
+c:`loop(8);
+
+// The major scale pattern, in semitones
+const steps = [0, 2, 4, 5, 7, 9, 11, 12];
+
+steps.forEach((s, i) => note(transpose("C4", s), i, 1));
+`,
+k:c=>c.note>=8},
+{t:"Chords",
+b:"<p>A <strong>chord</strong> is notes played together. The simplest is a <strong>triad</strong>: a root note, the note 4 semitones above it and the note 7 above it. Drop the middle note to 3 semitones and the chord turns <strong>minor</strong>. Major sounds happy, minor sounds sad.</p>",
+g:"change loop to 16, then add A minor on beat 8 and F major on beat 12.",
+c:`loop(8);
+
+function triad(root, third, beat) {
+  chord([root, transpose(root, third), transpose(root, 7)], beat, 4);
+}
+
+triad("C3", 4, 0);   // C major: third is 4 semitones up
+triad("C3", 3, 4);   // C minor: third is 3 semitones up
+`,
+k:c=>c.note>=12},
+{t:"Rhythm and time",
+b:"<p>Music is counted in <strong>beats</strong>, usually in groups of four. In the code, beat 0 is the count “one”, beat 1 is “two”, and so on. Drums mark the pulse: kick on one and three, snare on two and four. Split a beat in half for eighth notes (0.5) or into quarters for sixteenth notes (0.25). Hits placed between the counts, like 1.5, give <strong>syncopation</strong>: a bouncy off-beat feel.</p>",
+g:"add a syncopated kick on beat 1.5, then change the hats to eighth notes (8 hats, using i * 0.5).",
+c:`loop(4);
+
+kick(0);
+kick(2);
+snare(1);
+snare(3);
+
+for (let i = 0; i < 16; i++) {
+  hat(i * 0.25);   // sixteenth notes: four per beat
+}
+`,
+k:(c,s,e)=>e.some(o=>o.k==="kick"&&o.beat===1.5)&&c.hat>=8},
+{t:"Chord progressions",
+b:"<p>A <strong>chord progression</strong> plays chords in order. Building them from a scale keeps everything in one key. A pop favourite uses the 1st, 5th, 6th and 4th notes of the scale as roots. In code we count from 0, so those are positions <code>0 4 5 3</code>.</p>",
+g:"make the chord on position 5 minor by using 3 semitones instead of 4 for its middle note. Then change the key to G3.",
+c:`bpm(100);
+loop(16);
+sound("sawtooth");
+
+const key = makeScale("C3", "major");   // 8 notes
+const positions = [0, 4, 5, 3];
+
+positions.forEach((p, i) => {
+  const root = key[p];
+  chord([root, transpose(root, 4), transpose(root, 7)], i * 4, 4);
+});
+`,
+k:c=>c.note>=12},
+{t:"Waveforms",
+b:"<p>Every sound is a vibrating wave, and the <strong>shape</strong> of the wave changes the tone. <code>sine</code> is pure and soft, <code>triangle</code> is mellow, <code>square</code> is hollow and retro, and <code>sawtooth</code> is bright and buzzy. Same note, four personalities.</p>",
+g:"add a fifth note one octave higher with transpose('A3', 12), in the wave you like best.",
+c:`loop(8);
+
+const waves = ["sine", "triangle", "square", "sawtooth"];
+
+waves.forEach((w, i) => {
+  sound(w);                // every note after this uses wave w
+  note("A3", i * 2, 2);
+});
+`,
+k:c=>c.note>=5},
+{t:"Note length",
+b:"<p>The third number in <code>note(name, beat, length)</code> is how long the note lasts. Short notes are <strong>staccato</strong>: crisp and bouncy. Long notes that run into each other are <strong>legato</strong>: smooth and singing. Same notes, different feel.</p>",
+g:"add one long bass note under everything: note('A2', 0, 8).",
+c:`loop(8);
+sound("triangle");
+const melody = ["E4", "G4", "A4", "G4"];
+
+// Staccato: short notes with gaps
+melody.forEach((n, i) => note(n, i * 0.5, 0.25));
+
+// Legato: each note lasts until the next one starts
+melody.forEach((n, i) => note(n, 4 + i, 1));
+`,
+k:c=>c.note>=9},
+{t:"Genre beats",
+b:"<p>Genres have drum fingerprints. <strong>Rock</strong> hits the kick on one and three, and the snare on two and four. <strong>House</strong> plays the kick on every beat with hats in between. <strong>Hip-hop</strong> uses a laid-back, syncopated kick with busy hats. Writing each as a function lets you swap genres with one line.</p>",
+g:"write a third function called hiphop: kick on beats 0 and 2.5, snare on 1 and 3, hats on every half beat. Call it instead of rock().",
+c:`bpm(100);
+loop(4);
+
+function rock() {
+  kick(0);
+  kick(2);
+  snare(1);
+  snare(3);
+  for (let i = 0; i < 8; i++) hat(i * 0.5);
+}
+
+function house() {
+  for (let i = 0; i < 4; i++) {
+    kick(i);
+    hat(i + 0.5);
+  }
+  snare(1);
+  snare(3);
+}
+
+rock();
+// house();   // remove the // to try this one
+`,
+k:(c,s,e)=>e.some(o=>o.k==="kick"&&o.beat===2.5)},
+{t:"Intervals",
+b:"<p>An <strong>interval</strong> is the distance between two notes, counted in semitones. 3 semitones is a minor third, 4 is a major third, 7 is a perfect fifth and 12 is an octave. Melodies are chains of intervals, so a trained ear hears them everywhere. Try the Ear training page.</p>",
+g:"set loop to 12, then add a second forEach that plays the gaps again from beat 6, an octave lower, using transpose(root, g - 12).",
+c:`loop(8);
+
+const root = "C4";
+const gaps = [0, 3, 4, 5, 7, 12];
+
+gaps.forEach((g, i) => note(transpose(root, g), i, 1));
+`,
+k:c=>c.note>=12},
+{t:"Melody and motifs",
+b:"<p>Memorable melodies repeat a short idea called a <strong>motif</strong>, then change it a little. Write the motif once as a function, then play it from different starting notes to make the melody travel.</p>",
+g:"play the motif twice more, starting on F4 at beat 8 and G4 at beat 12.",
+c:`loop(16);
+sound("square");
+
+function motif(root, beat) {
+  note(root, beat, 1);
+  note(transpose(root, 4), beat + 1, 1);
+  note(transpose(root, 7), beat + 2, 1);
+  note(transpose(root, 4), beat + 3, 1);
+}
+
+motif("C4", 0);
+motif("C4", 4);
+`,
+k:c=>c.note>=16},
+{t:"Bass lines",
+b:"<p>The <strong>bass line</strong> glues the drums and melody together. A simple rule: play the root of the current chord low down, add the same note an octave up (12 semitones) for bounce, and keep it steady.</p>",
+g:"add a kick on every beat (16 of them) with a for loop.",
+c:`bpm(100);
+loop(16);
+sound("sawtooth");
+
+const roots = ["C2", "A1", "F2", "G2"];
+
+roots.forEach((r, i) => {
+  note(r, i * 4, 2);
+  note(transpose(r, 12), i * 4 + 2, 1);
+  note(r, i * 4 + 3, 1);
+});
+`,
+k:c=>c.kick>=16},
+{t:"Song structure",
+b:"<p>Songs are built from <strong>sections</strong>: intro, verse, chorus. Write each section as a function that takes a start beat, then arrange the song by calling them in order. It is the functions lesson again, at song size.</p>",
+g:"extend the song: add a second chorus at beat 16 and a short ending at beat 20 with just a kick and one long note.",
+c:`bpm(110);
+loop(24);
+
+function groove(start) {
+  for (let i = 0; i < 4; i++) {
+    kick(start + i);
+    hat(start + i + 0.5);
+  }
+  snare(start + 1);
+  snare(start + 3);
+}
+
+function chorus(start) {
+  sound("sawtooth");
+  chord(["C3", "E3", "G3"], start, 4);
+}
+
+groove(0);            // verse: drums only
+groove(4);
+groove(8);            // chorus: drums plus chords
+chorus(8);
+`,
+k:(c,s,e)=>e.some(o=>o.beat>=16)&&e.some(o=>o.beat>=20)},
+{t:"Your first song",
+b:"<p>Time to put it all together. This starter has drums, chords and a melody stored in an object. Change the key, rewrite the melody, add a section. When you like what you hear, you have written a song in code.</p>",
+g:"change the key, the melody numbers and the tempo, then add one new thing of your own: a bass line, a new section or a random note.",
+c:`const song = {
+  tempo: 104,
+  key: "A3",
+  melody: [0, 3, 7, 3, 5, 3, 2, 0],   // semitones above the key
+};
+
+bpm(song.tempo);
+loop(16);
+
+sound("square");
+song.melody.forEach((s, i) => note(transpose(song.key, s + 12), i, 1));
+song.melody.forEach((s, i) => note(transpose(song.key, s + 12), i + 8, 1));
+
+sound("sawtooth");
+[0, 8].forEach(b => {
+  chord([song.key, transpose(song.key, 3), transpose(song.key, 7)], b, 8);
+});
+
+for (let i = 0; i < 16; i++) {
+  if (i % 4 === 0) kick(i);
+  if (i % 4 === 2) snare(i);
+  hat(i + 0.5);
+}
+`,
+k:()=>true}
+];
+let ctx,master,an,noise,timer,raf,t0=0,dur=1,playing=false,ev=[],st={bpm:120,loop:4},cur=0,vl=0,done=new Set();
+try{done=new Set(JSON.parse(localStorage.getItem("cb-done")||"[]"))}catch(e){}
+
+function ac(){
+  if(!ctx){ctx=new(window.AudioContext||window.webkitAudioContext)();an=ctx.createAnalyser();an.fftSize=256;an.connect(ctx.destination);
+    noise=ctx.createBuffer(1,ctx.sampleRate,ctx.sampleRate);const d=noise.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=Math.random()*2-1}
+  if(ctx.state==="suspended")ctx.resume();
+  master=ctx.createGain();master.gain.value=.6;master.connect(an);
+}
+function freq(n){return 440*Math.pow(2,(mid(n)-69)/12)}
+function mid(n){
+  const m=/^([A-Ga-g])([#b]?)(-?\d)$/.exec(String(n).trim());
+  if(!m)throw new Error("“"+n+"” isn’t a note name. Try \"C4\" or \"F#3\".");
+  const s={C:0,D:2,E:4,F:5,G:7,A:9,B:11}[m[1].toUpperCase()]+(m[2]==="#"?1:m[2]==="b"?-1:0);
+  return 12*(+m[3]+1)+s;
+}
+function build(code){
+  const e=[];let w="triangle",b=120,l=4;
+  const add=o=>{
+    if(e.length>1500)throw new Error("Too many sounds (the limit is 1500). Check your loops.");
+    if(typeof o.beat!=="number"||isNaN(o.beat))throw new Error("A beat must be a number, like 0, 1 or 2.5.");
+    e.push(o);
+  };
+  const api={
+    bpm:n=>{b=Math.min(200,Math.max(50,+n||120))},
+    loop:n=>{l=Math.min(32,Math.max(1,+n||4))},
+    sound:s=>{if(!["sine","triangle","square","sawtooth"].includes(s))throw new Error("sound() needs \"sine\", \"triangle\", \"square\" or \"sawtooth\".");w=s},
+    kick:x=>add({k:"kick",beat:x}),snare:x=>add({k:"snare",beat:x}),hat:x=>add({k:"hat",beat:x}),
+    note:(n,x,len=1)=>add({k:"note",f:freq(n),n:api.transpose(n,0),beat:x,len:+len||1,w}),
+    chord:(ns,x,len=1)=>ns.forEach(n=>api.note(n,x,len)),
+    transpose:(n,s)=>{const m=mid(n)+s;return NN[((m%12)+12)%12]+(Math.floor(m/12)-1)},
+    makeScale:(r,type)=>(type==="minor"?[0,2,3,5,7,8,10,12]:[0,2,4,5,7,9,11,12]).map(s=>api.transpose(r,s))
+  };
+  new Function(...Object.keys(api),'"use strict";'+code)(...Object.values(api));
+  return{e,b,l};
+}
+function voice(o,t,spb){
+  const c=ctx,g=c.createGain();g.connect(master);
+  if(o.k==="kick"){
+    const s=c.createOscillator();s.frequency.setValueAtTime(150,t);s.frequency.exponentialRampToValueAtTime(40,t+.12);
+    g.gain.setValueAtTime(1,t);g.gain.exponentialRampToValueAtTime(.001,t+.35);s.connect(g);s.start(t);s.stop(t+.4);
+  }else if(o.k==="note"){
+    const s=c.createOscillator(),d=o.len*spb;s.type=o.w;s.frequency.value=o.f;lit(o.n,(t-c.currentTime)*1000,d*1000);
+    g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(.12,t+.01);g.gain.setValueAtTime(.12,t+Math.max(.02,d-.05));g.gain.linearRampToValueAtTime(.0001,t+d+.05);
+    s.connect(g);s.start(t);s.stop(t+d+.1);
+  }else{
+    const s=c.createBufferSource(),f=c.createBiquadFilter(),hat=o.k==="hat",d=hat?.05:.18;
+    s.buffer=noise;f.type="highpass";f.frequency.value=hat?7000:1500;s.connect(f);f.connect(g);
+    g.gain.setValueAtTime(hat?.35:.6,t);g.gain.exponentialRampToValueAtTime(.001,t+d);s.start(t);s.stop(t+d+.02);
+    if(!hat){const z=c.createOscillator(),zg=c.createGain();z.type="triangle";z.frequency.value=190;zg.gain.setValueAtTime(.4,t);zg.gain.exponentialRampToValueAtTime(.001,t+.1);z.connect(zg);zg.connect(master);z.start(t);z.stop(t+.12)}
+  }
+}
+function begin(){
+  ac();const spb=60/st.bpm;dur=st.loop*spb;t0=ctx.currentTime+.08;let next=t0;
+  const tick=()=>{while(next<ctx.currentTime+.25){ev.forEach(o=>voice(o,next+o.beat*spb,spb));next+=dur}};
+  tick();timer=setInterval(tick,50);playing=true;$("#play").classList.add("on");anim();
+}
+function stop(){
+  clearInterval(timer);cancelAnimationFrame(raf);
+  if(playing&&master)master.disconnect();
+  playing=false;$("#play").classList.remove("on");$("#vu").style.width="0";draw();
+}
+function log(m,err){const l=$("#log");l.textContent=m;l.className=err?"err":""}
+const cnt=e=>e.reduce((a,x)=>(a[x.k]++,a),{kick:0,snare:0,hat:0,note:0});
+
+function run(){if(document.body.dataset.view!=="learn")view("learn");
+  stop();let r;
+  try{r=build($("#code").value)}catch(e){log("✖ "+e.name+": "+e.message,1);return}
+  st={bpm:r.b,loop:r.l};$("#dB").textContent=r.b;$("#dL").textContent=r.l;
+  ev=r.e.filter(o=>o.beat>=0&&o.beat<r.l);const out=r.e.length-ev.length;draw();
+  if(!ev.length){log("Nothing to play yet. Add a note(…), kick(…), snare(…) or hat(…) line.");return}
+  begin();
+  let m="▶ Playing "+ev.length+" sounds at "+r.b+" BPM"+(out?". "+out+" fell outside loop("+r.l+") and were skipped":"");
+  if(L[cur].k(cnt(ev),st,ev)){done.add(cur);try{localStorage.setItem("cb-done",JSON.stringify([...done]))}catch(e){}m+=". ★ Mission complete!"+(done.size===L.length?" You finished the course!":"");renderList()}
+  else m+=". Mission not complete yet; re-read it on the left.";
+  log(m);
+}
+function draw(){
+  const c=$("#cv"),g=c.getContext("2d"),r=window.devicePixelRatio||1,w=c.clientWidth,h=c.clientHeight;
+  if(c.width!==Math.round(w*r)||c.height!==Math.round(h*r)){c.width=Math.round(w*r);c.height=Math.round(h*r)}
+  g.setTransform(r,0,0,r,0,0);g.fillStyle="#150e07";g.fillRect(0,0,w,h);
+  const lanes=[["Kick","kick","#e0533b"],["Snare","snare","#f0a02b"],["Hi-hat","hat","#e8d44d"],["Synth","note","#5fc98a"]],lw=64,lh=h/4,bw=(w-lw)/st.loop;
+  lanes.forEach((_,i)=>{g.fillStyle=i%2?"#1d150c":"#241a10";g.fillRect(0,i*lh,w,lh)});
+  for(let i=0;i<=st.loop;i++){g.fillStyle=i%4?"#33271a":"#54412b";g.fillRect(lw+i*bw,0,1,h)}
+  const ns=ev.filter(o=>o.k==="note").map(o=>12*Math.log2(o.f/440)),lo=Math.min(...ns),hi=Math.max(...ns);
+  ev.forEach(o=>{
+    const i=lanes.findIndex(l=>l[1]===o.k),y=i*lh;g.fillStyle=lanes[i][2];
+    if(o.k==="note"){const m=12*Math.log2(o.f/440),p=hi===lo?.5:(m-lo)/(hi-lo);g.fillRect(lw+o.beat*bw+1,y+8+(1-p)*(lh-26),Math.max(4,o.len*bw-2),9)}
+    else g.fillRect(lw+o.beat*bw,y+9,Math.max(5,bw*.12),lh-18);
+  });
+  g.font="12px system-ui,sans-serif";g.textBaseline="middle";
+  lanes.forEach((l,i)=>{g.fillStyle="#2b1d0e";g.fillRect(0,i*lh,lw,lh);g.fillStyle=l[2];g.fillText(l[0],8,i*lh+lh/2)});
+  if(playing){const p=Math.max(0,(ctx.currentTime-t0)%dur)/dur;g.fillStyle="#fff3d6";g.fillRect(lw+p*(w-lw)-1,0,2,h)}
+}
+function anim(){
+  draw();const a=new Uint8Array(an.fftSize);an.getByteTimeDomainData(a);
+  let pk=0;for(const v of a)pk=Math.max(pk,Math.abs(v-128)/128);
+  vl=Math.max(pk,vl*.9);$("#vu").style.width=Math.min(100,vl*140)+"%";
+  raf=requestAnimationFrame(anim);
+}
+function renderList(){
+  $("#list").innerHTML="";$("#lh").textContent="Lessons: "+done.size+" of "+L.length+" complete";
+  L.forEach((l,i)=>{
+    const b=document.createElement("button");b.innerHTML="<span>"+(done.has(i)?"✓":i+1-CR[cidx(i)][1])+"</span>"+l.t;
+    if(done.has(i))b.className="ok";if(i===cur)b.setAttribute("aria-current","true");
+    const ci=CR.findIndex((c,j)=>!CR[j+1]||i<CR[j+1][1]);if(ci!==cidx(cur))return;if(i===CR[ci][1]){const h=document.createElement("div"),e=CR[ci+1]?CR[ci+1][1]:L.length;let n=0;for(let j=CR[ci][1];j<e;j++)if(done.has(j))n++;h.className="ch";h.textContent=CR[ci][0]+": "+n+" of "+(e-CR[ci][1])+" complete";$("#list").appendChild(h)}b.onclick=()=>show(i);$("#list").appendChild(b);
+  });
+}
+function show(i){
+  stop();cur=Math.max(0,Math.min(L.length-1,i));const l=L[cur];
+  $("#lt").textContent=l.t;$("#lbody").innerHTML=l.b;$("#goal").textContent=l.g;$("#code").value=l.c;
+  ev=[];st={bpm:120,loop:4};$("#dB").textContent=120;$("#dL").textContent=4;
+  log("Press Play to run your code.");renderList();draw();
+}
+$("#play").onclick=run;$("#stop").onclick=()=>{stop();log("Stopped.")};
+$("#prev").onclick=()=>show(cur-1);$("#next").onclick=()=>show(cur+1);
+$("#reset").onclick=()=>{$("#code").value=L[cur].c;log("Code reset.")};
+$("#code").addEventListener("keydown",e=>{
+  if((e.ctrlKey||e.metaKey)&&e.key==="Enter"){e.preventDefault();run()}
+  if(e.key==="Tab"){e.preventDefault();const t=e.target,s=t.selectionStart;t.setRangeText("  ",s,t.selectionEnd,"end")}
+});
+addEventListener("resize",()=>{if(!playing)draw()});
+const DEMO=`bpm(110);
+loop(4);
+sound("square");
+
+for (let i = 0; i < 4; i++) {
+  kick(i);
+  hat(i + 0.5);
+}
+snare(1);
+snare(3);
+note("E4", 0, 1);
+note("G4", 1, 1);
+note("A4", 2, 2);`;
+let first=true;
+const NN=["C","C#","D","D#","E","F","F#","G","G#","A","A#","B"];
+const CR=[["JavaScript basics",0],["Music theory",11],["Sound design",16],["Songwriting",19],["Generative music",24]];
+function keys(){
+  const kb=$("#kb"),W=100/28;let wi=0;
+  for(let m=36;m<84;m++){
+    const l=NN[m%12],n=l+(Math.floor(m/12)-1),e=document.createElement("div");e.dataset.n=n;
+    if(l.includes("#")){e.className="bk";e.style.cssText="left:"+(wi*W-W*.3)+"%;width:"+W*.6+"%"}
+    else{e.className="wk";e.style.cssText="left:"+wi*W+"%;width:"+W+"%";if(l==="C")e.textContent=n;wi++}
+    kb.appendChild(e);
+  }
+}
+function lit(n,d,l){const e=document.querySelector('[data-n="'+n+'"]');if(!e)return;d=Math.max(0,d);setTimeout(()=>e.classList.add("on"),d);setTimeout(()=>e.classList.remove("on"),d+l)}
+$("#kb").onpointerdown=e=>{const n=e.target.dataset.n;if(!n)return;if(!playing||!ctx)ac();voice({k:"note",f:freq(n),n,len:1,w:"triangle"},ctx.currentTime,.5);$("#kn").textContent=n+": "+freq(n).toFixed(1)+" Hz, note number "+mid(n)};
+keys();
+function cidx(i){return CR.findIndex((c,j)=>!CR[j+1]||i<CR[j+1][1])}
+function ce(n){return CR[n+1]?CR[n+1][1]:L.length}
+const CD=["Variables, loops, arrays and functions, learned by writing real code.","How notes, scales, chords and rhythm actually work.","Waveforms, note length and the drum patterns behind each genre.","Melody, bass lines and song structure, ending with your first full song.","Let the computer roll the dice: arpeggios, chance and pattern strings."];
+const CC=["#f0a62e","#5fc98a","#e0533b","#6aa7e8","#b58be0"];
+function home(){
+  let h="<h1>Choose a course</h1><p>"+done.size+" of "+L.length+" lessons complete. Each course stands on its own, so start wherever you like.</p><div class='cg'>";
+  CR.forEach((c,n)=>{const a=c[1],z=ce(n);let d=0;for(let j=a;j<z;j++)if(done.has(j))d++;
+    h+="<div class='cc' style='--c:"+CC[n]+"'><h3>"+c[0]+"</h3><p>"+CD[n]+"</p><div class='pb'><i style='width:"+100*d/(z-a)+"%'></i></div><span>"+d+" of "+(z-a)+" lessons complete</span><button data-c='"+n+"'>"+(d?(d<z-a?"Continue":"Review"):"Start")+"</button></div>"});
+  $("#hm").innerHTML=h+"</div>";
+  document.querySelectorAll("[data-c]").forEach(b=>b.onclick=()=>{const n=+b.dataset.c,a=CR[n][1],z=ce(n);let t=a;for(let j=a;j<z;j++)if(!done.has(j)){t=j;break}view("learn");show(t)});
+}
+function view(v){
+  document.body.dataset.view=v;$("main").className=v==="learn"?"":"one";
+  document.querySelectorAll("[data-v]").forEach(e=>e.hidden=!e.dataset.v.split(" ").includes(v));
+  document.querySelectorAll("[data-go]").forEach(b=>b.setAttribute("aria-current",b.dataset.go===v?"page":"false"));
+  if(v==="home")home();if(v==="learn")draw();scrollTo(0,0);
+}
+document.querySelector("details").closest("section").dataset.v="ref";
+document.querySelectorAll("details").forEach(d=>d.open=true);
+document.querySelectorAll("[data-go]").forEach(b=>b.onclick=()=>view(b.dataset.go));
+let cq=null,cs=[0,0];
+function chordPlay(){if(!playing||!ctx)ac();if(!cq)cq={r:55+Math.floor(Math.random()*12),m:Math.random()<.5};const t=ctx.currentTime+.05;[0,cq.m?4:3,7].forEach(s=>{const m=cq.r+s;voice({k:"note",f:440*Math.pow(2,(m-69)/12),n:NN[m%12]+(Math.floor(m/12)-1),len:2,w:"triangle"},t,.5)});$("#cf").textContent="Major or minor?"}
+function chordAns(m){if(!cq){$("#cf").textContent="Press Play chord first.";return}cs[1]++;const ok=cq.m===m;if(ok)cs[0]++;$("#cf").textContent=(ok?"Correct! ":"Not quite. ")+"That chord was "+(cq.m?"major":"minor")+". Score: "+cs[0]+" of "+cs[1];cq=null}
+$("#cp").onclick=chordPlay;$("#cm1").onclick=()=>chordAns(true);$("#cm2").onclick=()=>chordAns(false);
+L.push(
+{t:"Arpeggios",
+b:"<p>An <strong>arpeggio</strong> plays a chord’s notes one after another instead of together. Loop over the notes and give each its own beat. Notes a quarter of a beat apart shimmer.</p>",
+g:"fill the whole bar: wrap the forEach in a for loop (let b = 0; b < 2; b++) and add b * 2 to each beat.",
+c:`loop(4);
+sound("triangle");
+
+const chordNotes = ["A3", "C4", "E4", "A4"];
+
+chordNotes.forEach((n, i) => note(n, i * 0.5, 0.5));
+`,
+k:c=>c.note>=8},
+{t:"Chance",
+b:"<p><code>Math.random() &lt; 0.3</code> is true about 30 percent of the time. Use it inside a loop and drums skip or fire at random, so no two plays are the same. This is <strong>generative music</strong>: you write the rules and the computer rolls the dice.</p>",
+g:"add a kick that fires with a 40 percent chance on every whole beat of the 8.",
+c:`loop(8);
+
+for (let i = 0; i < 16; i++) {
+  const beat = i * 0.5;
+  if (Math.random() < 0.8) hat(beat);     // 80% chance
+  if (Math.random() < 0.3) snare(beat);   // 30% chance
+}
+
+kick(0);
+kick(4);
+`,
+k:c=>c.kick>=3},
+{t:"Pattern strings",
+b:"<p>Producers write drum patterns as rows of steps. A string like <code>'x...x...'</code> is a list of characters: <code>x</code> is a hit and <code>.</code> is a rest. Loop over it and play on every x. Each step is a sixteenth note, 0.25 beats. Notice that <code>kick</code> is passed into <code>row</code> like any other value.</p>",
+g:"add a fourth row that plays a high note: row('..x...x...x...x.', beat => note('C5', beat, 0.25));",
+c:`loop(4);
+
+function row(pattern, play) {
+  for (let i = 0; i < pattern.length; i++) {
+    if (pattern[i] === "x") play(i * 0.25);
+  }
+}
+
+row("x...x...x...x...", kick);
+row("....x.......x...", snare);
+row("x.x.x.x.x.x.x.x.", hat);
+`,
+k:c=>c.note>=3},
+{t:"Generative jam",
+b:"<p>Combine chance, scales and chords. This jam picks random notes from a minor scale, so every Play is a new tune, while the bass and drums keep it grounded.</p>",
+g:"press Play five times and keep the version you like. Then change the scale, the 0.7 chance or the tempo.",
+c:`bpm(112);
+loop(16);
+
+const scale = makeScale("A3", "minor");
+
+sound("square");
+for (let i = 0; i < 32; i++) {
+  if (Math.random() < 0.7) {
+    const pick = Math.floor(Math.random() * scale.length);
+    note(scale[pick], i * 0.5, 0.5);
+  }
+}
+
+sound("sawtooth");
+note("A2", 0, 8);
+note("F2", 8, 8);
+
+for (let i = 0; i < 16; i++) {
+  if (i % 4 === 0) kick(i);
+  if (i % 4 === 2) snare(i);
+  hat(i + 0.5);
+}
+`,
+k:()=>true});
+const HINTS=[
+'Copy the last note line and change the beat to 3, like note("C5", 3, 1);',
+'Change the 100 in let speed = 100; to a bigger number, like 150.',
+'Inside the for loop, under kick(i);, add hat(i + 0.5);',
+'Under the melody, add: for (let i = 0; i < 8; i++) { kick(i); }',
+'Add the line backbeat(4); under backbeat(0); The function plays from whatever beat you give it.',
+'Inside the for loop add: if (i % 4 === 0) { note("C2", i, 2); }',
+'Add snare(0 + 1); and snare(1 + 2); under the kicks.',
+'Change i < 8 to i < 16, put the note at beat i * 0.5, and give it length 0.5.',
+'Add drums: 4, to the object, then add: for (let i = 0; i < song.drums; i++) { kick(i * 2); }',
+'Read the first message after Play. Note names only go A to G. Then check how kick is spelled. Last, make loop big enough for all the hats.',
+'No wrong answers here. Change one thing at a time and press Play.',
+'Add "F4", "G4", "A4", "B4", "C5" to the end of the array, separated by commas.',
+'The minor steps are 0, 2, 3, 5, 7, 8, 10, 12. Replace the steps array with them.',
+'Change loop(8) to loop(16), then add triad("A3", 3, 8); and triad("F3", 4, 12);',
+'Add kick(1.5); then change i < 16 to i < 8 and hat(i * 0.25) to hat(i * 0.5).',
+'Use an if inside the forEach: when p is 5, the middle note should be 3 semitones up instead of 4.',
+'Add this under the forEach: note(transpose("A3", 12), 7, 1);',
+'Add note("A2", 0, 8); at the bottom. Length 8 lasts the whole loop.',
+'Copy house(), rename it hiphop, and use kick(0); kick(2.5); snare(1); snare(3); plus hats on every half beat. Then call hiphop(); instead of rock();',
+'Set loop(12). Copy the forEach, change the beat to i + 6 and the transpose amount to g - 12.',
+'Add motif("F4", 8); and motif("G4", 12); below the other calls.',
+'Under the bass, add: for (let i = 0; i < 16; i++) { kick(i); }',
+'Add groove(16); chorus(16); and an ending such as kick(20); note("C3", 20, 4);',
+'Change one value at a time: the key, the tempo or the melody numbers. Press Play after each change.',
+'Put the forEach inside for (let b = 0; b < 2; b++) { ... } and change the beat to b * 2 + i * 0.5.',
+'Add: for (let i = 0; i < 8; i++) { if (Math.random() < 0.4) kick(i); } Press Play again if it stays short.',
+'Add a row with a function: row("..x...x...x...x.", beat => note("C5", beat, 0.25));',
+'Press Play several times. Change 0.7 to a higher or lower number to make the melody busier or sparser.'];
+$("#hint").onclick=()=>log("Hint: "+HINTS[cur]);
+const IV=[["Minor 2nd",1],["Major 2nd",2],["Minor 3rd",3],["Major 3rd",4],["Perfect 4th",5],["Perfect 5th",7],["Octave",12]];
+let eq=null,es=[0,0];
+function ping(m,t){voice({k:"note",f:440*Math.pow(2,(m-69)/12),n:NN[m%12]+(Math.floor(m/12)-1),len:1,w:"triangle"},t,.5)}
+function earPlay(){
+  if(!playing||!ctx)ac();
+  if(!eq)eq={r:55+Math.floor(Math.random()*12),i:IV[Math.floor(Math.random()*IV.length)]};
+  const t=ctx.currentTime+.05;ping(eq.r,t);ping(eq.r+eq.i[1],t+.7);
+  $("#ef").textContent="Which interval was that?";
+}
+function earAns(n){
+  if(!eq){$("#ef").textContent="Press Play interval first.";return}
+  es[1]++;const ok=eq.i[0]===n;if(ok)es[0]++;
+  $("#ef").textContent=(ok?"Correct! ":"Not quite. ")+"The interval was "+eq.i[0]+" ("+eq.i[1]+" semitones). Score: "+es[0]+" of "+es[1];
+  eq=null;
+}
+IV.forEach(v=>{const b=document.createElement("button");b.textContent=v[0];b.onclick=()=>earAns(v[0]);$("#eb").appendChild(b)});
+$("#ep").onclick=earPlay;
+$("#demo").textContent=DEMO;$("#nl").textContent=L.length;
+function intro(open){
+  $("#intro").hidden=!open;
+  if(open){stop();$("#go").textContent=first?(done.size?"Continue learning":"Start learning"):"Close intro";$("#go").focus()}
+}
+$("#hear").onclick=()=>{stop();try{const r=build(DEMO);st={bpm:r.b,loop:r.l};ev=r.e;$("#dB").textContent=r.b;$("#dL").textContent=r.l;begin()}catch(e){}};
+$("#go").onclick=()=>{intro(false);if(first){first=false;const n=L.findIndex((_,i)=>!done.has(i));show(n<0?0:n);view("learn")}else stop()};
+$("#introBtn").onclick=()=>intro(true);
+addEventListener("keydown",e=>{if(e.key==="Escape"&&!$("#intro").hidden)$("#go").click()});
+show(0);view("home");intro(true);
+</script>
+</body>
+</html>
